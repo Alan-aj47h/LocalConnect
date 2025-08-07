@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - LocalConnect</title>
+  <link rel="stylesheet" href="Registrationstyle.css"/>
+</head>
+<body>
+  <div class="container">
+    <h2>Create Your Account</h2>
+    <form id="signupForm" action="Registration.php" method="POST" novalidate>
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" name="name" required>
+      <span class="error" id="nameError"></span>
+      <label for="email">Email Address:</label>
+      <input type="email" id="email" name="email" required>
+      <span class="error" id="emailError"></span>
+      <label for="phone">Phone Number:</label>
+      <input type="tel" id="phone" name="phone" required>
+      <span class="error" id="phoneError"></span>
+      <label for="address">Address:</label>
+      <textarea id="address" name="address" rows="3" required></textarea>
+      <span class="error" id="addressError"></span>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+      <span class="error" id="passwordError"></span>
+      <label for="confirmPassword">Confirm Password:</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" required>
+      <span class="error" id="confirmPasswordError"></span>
+      <label>Choose Role:</label>
+      <div class="role-options">
+        <label><input type="radio" name="role" value="customer"> customer</label>
+        <label><input type="radio" name="role" value="provider"> Service Provider</label>
+      </div>
+      <span class="error" id="roleError"></span>
+
+      <button type="submit">Create Account</button>
+    </form>
+  </div>
+  <script src="Registervalidation.js"></script>
+</body>
+</html>
