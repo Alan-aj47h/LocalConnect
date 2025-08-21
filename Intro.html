@@ -16,7 +16,12 @@
                 LocalConnect is a platform designed to connect users with trusted local service providers like plumbers, electricians, and mechanics. Our mission is to make it easy, secure, and efficient to find reliable professionals in your area. We provide verified provider profiles with ratings and reviews to help users make informed choices. By supporting transparency and quality, we aim to build a trusted network that benefits both customers and service providers. Our goal is to simplify local service discovery and create a better experience for everyone involved.
             </p>
         </div>
-        <button onclick="window.location.href='Role.html'">Get Started</button>
+         <button id="getStartedBtn">Get Started</button>
     </div>
+    <script>
+        document.getElementById('getStartedBtn').addEventListener('click', function() {
+        window.location.href = 'Role.html';
+        });
+    </script>
 </body>
 </html>

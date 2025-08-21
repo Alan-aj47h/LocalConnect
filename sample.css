@@ -1,0 +1,14 @@
+h1{
+    text-align: center;
+    color: blueviolet;
+}
+p{
+    text-decoration:underline;
+    color: greenyellow;
+}
+.box{
+   text-align: center;
+}
+#container{
+    background-color: black;
+}
