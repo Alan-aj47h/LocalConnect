@@ -1,0 +1,79 @@
+ :root {
+    --background-dark: #030712; 
+    --accent-blue: #2563EB;
+    --accent-light-blue: #3B82F6; 
+    --accent-dark-blue: #1E3A8A;  
+    --text-light: #F9FAFB;
+    --text-medium: #9CA3AF;
+    --button-bg: #1F2937;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--background-dark);
+    color: var(--text-light);
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-box {
+    background-color: var(--button-bg);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    width: 350px;
+}
+
+h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--accent-light-blue);
+}
+
+.user-box {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.user-box input {
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid var(--accent-blue);
+    color: var(--text-light);
+    outline: none;
+    font-size: 16px;
+}
+
+.user-box label {
+    color: var(--text-medium);
+    font-size: 14px;
+    position: absolute;
+    top: -20px;
+    left: 0;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--accent-blue);
+    color: var(--text-light);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: var(--accent-dark-blue);
+}
