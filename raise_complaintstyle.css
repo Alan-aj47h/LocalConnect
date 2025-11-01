@@ -1,0 +1,102 @@
+/* Step 1: Foundational Styles and Variables from your main stylesheet */
+:root {
+    --color-gray-900: #111827;
+    --color-gray-800: #1f2937;
+    --color-gray-700: #374151;
+    --color-gray-600: #4b5563;
+    --color-gray-500: #6b7280;
+    --color-gray-400: #9ca3af;
+    --color-gray-300: #d1d5db;
+    --color-white: #ffffff;
+    --color-blue-400: #60a5fa;
+    --color-blue-500: #3b82f6;
+    --color-blue-600: #2563eb;
+    --color-blue-700: #1d4ed8;
+    --color-red-400: #f87171;
+    --color-green-400: #4ade80;
+    --color-yellow-400: #facc15;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    background-color: var(--color-gray-900);
+    color: var(--color-white);
+}
+
+/* Step 2: Specific Styles for the Complaint Page */
+.complaint-container { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    min-height: 100vh; 
+}
+
+.complaint-box { 
+    background-color: var(--color-gray-800); 
+    padding: 2rem; 
+    border-radius: 0.5rem; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); 
+    width: 100%; 
+    max-width: 420px; 
+}
+
+.complaint-box h2 { 
+    text-align: center; 
+    color: var(--color-white); 
+    margin-bottom: 1.5rem; 
+}
+
+.form-group { 
+    margin-bottom: 1rem; 
+}
+
+label { 
+    display: block; 
+    color: var(--color-gray-300); 
+    margin-bottom: 0.35rem; 
+}
+
+input, textarea { 
+    width: 100%; 
+    padding: 0.6rem; 
+    border: none; 
+    border-radius: 0.4rem; 
+    background-color: var(--color-gray-700); 
+    color: var(--color-white); 
+    font-size: 1rem; 
+    outline: none; 
+    box-sizing: border-box; 
+}
+
+textarea { 
+    resize: none; 
+    height: 110px; 
+}
+
+.btn-submit { 
+    width: 100%; 
+    background-color: var(--color-blue-600); 
+    color: var(--color-white); 
+    border: none; 
+    padding: 0.8rem; 
+    border-radius: 0.4rem; 
+    cursor: pointer; 
+    font-size: 1rem; 
+    transition: background-color 0.2s ease; 
+}
+
+.btn-submit:hover { 
+    background-color: var(--color-blue-700); 
+}
+
+.info-text { 
+    text-align: center; 
+    color: var(--color-gray-400); 
+    font-size: 0.9rem; 
+    margin-bottom: 1.5rem; 
+}
