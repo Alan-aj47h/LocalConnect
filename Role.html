@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Role - LocalConnect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="Rolestyle.css">
+</head>
+<body>
+  <div class="container">
+    <p class="subtitle">Welcome to LocalConnect</p>
+    <h1>Select Your Role</h1>
+    <div class="role-buttons">
+      <button class="role-btn" onclick="goToLogin('customer')">Customer</button>
+      <button class="role-btn" onclick="goToLogin('provider')">Service Provider</button>
+      <button class="role-btn" onclick="goToLogin('admin')">Admin</button>
+    </div>
+  </div>
+  <script>
+    function goToLogin(role) {
+      sessionStorage.setItem("selectedRole", role); 
+      window.location.href = `Login.php?role=${role}`;
+    }
+  </script>
+</body>
+</html>
