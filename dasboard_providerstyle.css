@@ -1,0 +1,226 @@
+:root {
+  --color-gray-900: #111827;
+  --color-gray-800: #1f2937;
+  --color-gray-700: #374151;
+  --color-gray-600: #4b5563;
+  --color-gray-400: #9ca3af;
+  --color-gray-300: #d1d5db;
+  --color-white: #ffffff;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-green-500: #22c55e;
+  --color-green-600: #16a34a;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+  --color-yellow-400: #facc15;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: var(--color-gray-900);
+  color: var(--color-white);
+}
+.container {
+  width: 100%;
+  padding: 1rem;
+}
+@media (min-width: 768px) {
+  .container { padding: 2rem; }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.header h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--color-blue-400);
+  margin: 0;
+}
+.header p {
+  color: var(--color-gray-400);
+  margin-top: 0.5rem;
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+@media (min-width: 768px) {
+  .dashboard-layout {
+    grid-template-columns: 220px 1fr;
+    align-items: flex-start;
+  }
+}
+
+.sidebar {
+  background-color: var(--color-gray-800);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  height: fit-content;
+}
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sidebar li { margin-bottom: 0.5rem; }
+.sidebar li a {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: var(--color-gray-300);
+  text-decoration: none;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.sidebar li a:hover {
+  background-color: var(--color-gray-700);
+  color: var(--color-white);
+}
+.sidebar li a.active {
+  background-color: var(--color-blue-600);
+  color: var(--color-white);
+  font-weight: 600;
+}
+
+.main-content {
+  background-color: var(--color-gray-800);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+.main-content h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  border-bottom: 1px solid var(--color-gray-700);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+form label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-gray-300);
+  margin-bottom: 0.5rem;
+}
+form input,
+form select,
+form textarea {
+  width: 100%;
+  background-color: var(--color-gray-900);
+  border: 1px solid var(--color-gray-600);
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  color: var(--color-white);
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+form input:focus,
+form select:focus,
+form textarea:focus {
+  outline: none;
+  border-color: var(--color-blue-500);
+  box-shadow: 0 0 0 2px var(--color-blue-500);
+}
+textarea { resize: vertical; }
+
+button,
+.btn {
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+button[type="submit"],
+.btn-primary {
+  background-color: var(--color-blue-600);
+  color: var(--color-white);
+}
+button[type="submit"]:hover,
+.btn-primary:hover {
+  background-color: var(--color-blue-500);
+}
+button[value="accept"] {
+  background-color: var(--color-green-600);
+  color: var(--color-white);
+}
+button[value="accept"]:hover {
+  background-color: var(--color-green-500);
+}
+button[value="reject"] {
+  background-color: var(--color-red-600);
+  color: var(--color-white);
+}
+button[value="reject"]:hover {
+  background-color: var(--color-red-600);
+}
+
+.appt-box {
+  background-color: var(--color-gray-700);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+.appt-box p { margin: 0.25rem 0; }
+.appt-actions { margin-top: 0.75rem; }
+
+.review-box {
+  background-color: var(--color-gray-700);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.review-box p {
+  margin: 0.25rem 0;
+}
+.review-box .customer-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--color-gray-300);
+}
+.review-box .review-text {
+  font-style: italic;
+  color: var(--color-gray-300);
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.review-box blockquote {
+  margin: 0.5rem 0 0.5rem 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--color-blue-500);
+  color: var(--color-gray-300);
+}
+.review-box .provider-reply {
+  margin-top: 1rem;
+  background-color: #111827; 
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+}
+.review-box .provider-reply blockquote {
+  border-left-color: var(--color-green-500);
+}
+.review-box small {
+  color: var(--color-gray-400);
+}
+.reply-form {
+  margin-top: 1rem;
+}
+.hidden {
+  display: none;
+}
+.btn-complete {
+  background: #28a745;  
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
