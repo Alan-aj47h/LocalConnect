@@ -51,7 +51,7 @@ $customer = $result->fetch_assoc();
         <label>Landmark (Optional)</label>
         <input type="text" name="landmark">
 
-        <label>Important Message to Provider</label>
+        <label>Important Message to Provider (Optional) </label>
         <textarea name="message"></textarea>
 
         <button type="submit">Confirm Appointment</button>

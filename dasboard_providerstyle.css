@@ -224,3 +224,38 @@ button[value="reject"]:hover {
   border-radius: 6px;
   cursor: pointer;
 }
+.notice-box {
+  padding:18px;
+  margin:20px;
+  border-radius:8px;
+  font-weight:600;
+  font-size:15px;
+  line-height:1.5;
+}
+.notice-deleted {
+  background:#ffcccc;
+  color:#5a0000;
+  border:1px solid #d68f8f;
+}
+.notice-suspended {
+  background:#ffb4b4;
+  color:#660000;
+  border:1px solid #e5a1a1;
+}
+.notice-rejected {
+  background:#ffeded;
+  color:#6b0000;
+  border:1px solid #ff8a8a;
+  text-align:center;
+}
+.notice-button {
+  padding:10px 20px;
+  background:#0052ff;
+  color:white;
+  border:none;
+  border-radius:6px;
+  font-size:15px;
+  cursor:pointer;
+  margin-top:12px;
+}
+

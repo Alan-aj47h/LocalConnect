@@ -12,8 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $provider_id = !empty($_POST['provider_id']) ? (int)$_POST['provider_id'] : null;
     $appointment_id = !empty($_POST['appointment_id']) ? (int)$_POST['appointment_id'] : null;
     $message = trim($_POST['message'] ?? '');
-    
-    if ($message === '' || $user_id === null) {
+    if ($message === '' || $user_id === null || $provider_id === null || $appointment_id === null) {
         echo "error: missing_data";
         exit;
     }
@@ -56,8 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if (isset($_SESSION['user_id'])): ?>
     <form id="complaintForm" class="complaint-box" method="POST">
       <h2>Raise a Complaint</h2>
-      <p class="info-text">Filing as: <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Logged in User'); ?></p>
-
       <div class="form-group">
         <label for="provider_id">Provider ID :</label>
         <input type="number" id="provider_id" name="provider_id">
@@ -85,30 +82,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   
   <script>
     document.getElementById("complaintForm")?.addEventListener("submit", function (event) {
-      event.preventDefault();
+  event.preventDefault();
 
-      const formData = new FormData(this);
+  const provider = document.getElementById("provider_id").value.trim();
+  const appointment = document.getElementById("appointment_id").value.trim();
+  const message = document.getElementById("message").value.trim();
+  if(provider === "" || appointment === "") {
+      alert("Provider ID and Appointment ID must be entered to register a complaint.");
+      return; 
+  }
 
-      fetch("raise_complaint.php", {
-        method: "POST",
-        body: formData
-      })
-      .then(r => r.text())
-      .then(result => {
-        const response = result.trim();
-        if (response === "success") {
-          alert("Your complaint has been registered. We will review it soon and contact you with any further updates from localconnect@gmail.com.");
-          window.location.href = 'dashboard_customer.php'; 
-        } else {
-          console.error("Server response:", response);
-          alert("Something went wrong. Please ensure you have filled out the details correctly and try again.");
-        }
-      })
-      .catch(err => {
-        console.error("Fetch error:", err);
-        alert("A network error occurred. Please check your connection and try again.");
-      });
-    });
+  if(message === "") {
+      alert("Complaint details cannot be empty.");
+      return;
+  }
+  const formData = new FormData(this);
+
+  fetch("raise_complaint.php", {
+    method: "POST",
+    body: formData
+  })
+  .then(r => r.text())
+  .then(result => {
+    const response = result.trim();
+    if (response === "success") {
+      alert("Your complaint has been registered. We will review it soon and contact you with any further updates from localconnect@gmail.com.");
+      window.location.href = 'dashboard_customer.php'; 
+    } else {
+      console.error("Server response:", response);
+      alert("Something went wrong. Please ensure you have filled out the details correctly and try again.");
+    }
+  })
+  .catch(err => {
+    console.error("Fetch error:", err);
+    alert("A network error occurred. Please check your connection and try again.");
+  });
+});
   </script>
 </body>
 </html>

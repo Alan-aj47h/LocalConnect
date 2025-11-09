@@ -8,7 +8,12 @@ $email    = $_POST['email'];
 $phone    = $_POST['phone'];
 $address  = $_POST['address'];
 $role     = $_POST['role']; 
+if(!preg_match("/^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com)$/", $email)){
+    echo "<script>alert('Only Gmail, Yahoo, or Outlook emails allowed'); window.location.href='register.html';</script>";
+    exit();
+}
 $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
 $checkEmail = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
 $checkEmail->bind_param("s", $email);
 $checkEmail->execute();

@@ -6,7 +6,6 @@ if (!isset($_SESSION['user_id'])) {
 }
 $customer_id = $_SESSION['user_id'];
 $displayName = null; 
-
 if ($stmt = $conn->prepare("SELECT name FROM users WHERE user_id = ? LIMIT 1")) {
     $stmt->bind_param("i", $customer_id);
     $stmt->execute();
@@ -19,11 +18,9 @@ if ($stmt = $conn->prepare("SELECT name FROM users WHERE user_id = ? LIMIT 1")) 
 $providers = [];
 $last_search = ['location' => '', 'service' => ''];
 $search_performed = false;
-
 if (isset($_GET['location']) || isset($_GET['service'])) {
     $location = trim($_GET['location'] ?? '');
     $service  = trim($_GET['service'] ?? '');
-
     if ($location !== '' || $service !== '') {
         $search_performed = true;
         $query = "
@@ -35,7 +32,6 @@ if (isset($_GET['location']) || isset($_GET['service'])) {
         ";
         $params = [];
         $types  = "";
-
         if ($location !== '') {
             $query .= " AND s.locations LIKE ?";
             $params[] = "%$location%";
@@ -65,7 +61,6 @@ if (isset($_GET['location']) || isset($_GET['service'])) {
         exit;
     }
 }
-
 if (isset($_SESSION['search_results'])) {
     $providers = $_SESSION['search_results'];
     $last_search = $_SESSION['last_search'] ?? $last_search;
@@ -73,7 +68,6 @@ if (isset($_SESSION['search_results'])) {
     unset($_SESSION['search_results']); 
     unset($_SESSION['last_search']);
 }
-
 $customerAppointments = [];
 $sql = "SELECT a.*, s.business_name, u.phone 
         FROM appointments a
@@ -106,9 +100,7 @@ $showAppointmentsServer = isset($_GET['show_appointments']) && $_GET['show_appoi
             <h1>LocalConnect</h1>
             <p>Find trusted local service providers near you.</p>
         </header>
-
         <div class="welcome-message">
-            
             <p>
                 <?php if (!empty($displayName)): ?>
                     Welcome, <b><?= htmlspecialchars($displayName) ?></b>
@@ -116,15 +108,12 @@ $showAppointmentsServer = isset($_GET['show_appointments']) && $_GET['show_appoi
                     Welcome!
                 <?php endif; ?>
             </p>
-    
         </div>
-
         <div class="top-right-controls">
             <button id="appointmentsToggle" class="appointments-btn" type="button">
                 Your Appointments
             </button>
         </div>
-
         <form method="GET" action="dashboard_customer.php" class="search-box" autocomplete="off">
             <div class="search-grid">
                 <div class="location-container">
@@ -144,7 +133,6 @@ $showAppointmentsServer = isset($_GET['show_appointments']) && $_GET['show_appoi
             </div>
             <button type="submit" class="btn btn-search">Search Providers</button>
         </form>
-
         <div id="search" class="results-grid">
             <?php if ($search_performed): ?>
                 <?php if (!empty($providers)): ?>
@@ -169,7 +157,6 @@ $showAppointmentsServer = isset($_GET['show_appointments']) && $_GET['show_appoi
                 <p class="hint">Enter a location and service to find providers nearby.</p>
             <?php endif; ?>
         </div>
-
         <section id="appointments" class="<?= $showAppointmentsServer ? 'appointments-visible' : ''; ?>">
             <h2>Your Appointments</h2>
             <?php if (empty($customerAppointments)): ?>
@@ -187,7 +174,6 @@ $showAppointmentsServer = isset($_GET['show_appointments']) && $_GET['show_appoi
                                 <p class="details"><strong>Provider Reply:</strong> <?= nl2br(htmlspecialchars($appt['provider_reply'] ?? 'No reply yet.')) ?></p>
                                 <p class="details"><strong>Status:</strong> <?= htmlspecialchars($appt['status'] ?? 'Pending') ?></p>
                             </div>
-
                             <?php if (strtolower(trim($appt['status'] ?? '')) === 'completed'): ?>
                               <div class="review-section">
                                 <button type="button" class="btn btn-profile show-review-modal-btn" 
@@ -212,18 +198,15 @@ $showAppointmentsServer = isset($_GET['show_appointments']) && $_GET['show_appoi
             <div id="modalStatus" class="review-status-message"></div>
         </div>
     </div>
-
     <script>
     document.addEventListener('DOMContentLoaded', function() {
       const appointmentsToggleBtn = document.getElementById('appointmentsToggle');
       const appointmentsSection = document.getElementById('appointments');
-
       if (appointmentsToggleBtn && appointmentsSection) {
         const isInitiallyVisible = appointmentsSection.classList.contains('appointments-visible');
         appointmentsSection.style.overflow = 'hidden';
         appointmentsSection.style.maxHeight = isInitiallyVisible ? appointmentsSection.scrollHeight + 'px' : '0';
         appointmentsSection.style.opacity = isInitiallyVisible ? '1' : '0';
-
         appointmentsToggleBtn.addEventListener('click', function () {
           const isVisible = appointmentsSection.classList.toggle('appointments-visible');
           if (isVisible) {
@@ -238,14 +221,11 @@ $showAppointmentsServer = isset($_GET['show_appointments']) && $_GET['show_appoi
           }
         });
       }
-
       const modal = document.getElementById('reviewModal');
       const closeModalBtn = document.getElementById('closeModalBtn');
       const openModalBtns = document.querySelectorAll('.show-review-modal-btn');
       const modalSaveBtn = document.getElementById('modalSaveBtn');
-      
       let currentAppointmentId = null;
-
       function showModal(appointmentId, businessName) {
         currentAppointmentId = appointmentId;
         document.getElementById('modalTitle').textContent = `Write a review for ${businessName}`;
@@ -253,12 +233,10 @@ $showAppointmentsServer = isset($_GET['show_appointments']) && $_GET['show_appoi
         document.getElementById('modalStatus').textContent = '';
         modal.style.display = 'flex';
       }
-
       function hideModal() {
         modal.style.display = 'none';
         currentAppointmentId = null;
       }
-
       openModalBtns.forEach(button => {
         button.addEventListener("click", () => {
           const appointmentId = button.getAttribute("data-appointment-id");
@@ -266,32 +244,25 @@ $showAppointmentsServer = isset($_GET['show_appointments']) && $_GET['show_appoi
           showModal(appointmentId, businessName);
         });
       });
-
       closeModalBtn.addEventListener('click', hideModal);
       modal.addEventListener('click', function(event) {
         if (event.target === modal) {
           hideModal();
         }
       });
-
       modalSaveBtn.addEventListener("click", () => {
         if (!currentAppointmentId) return;
-
         const textarea = document.getElementById('modalTextarea');
         const statusMsg = document.getElementById('modalStatus');
         const reviewText = textarea.value.trim();
-
         if (reviewText === "") {
           statusMsg.textContent = "Please write a review before saving.";
           return;
         }
-
         statusMsg.textContent = "Saving...";
-
         const body = new URLSearchParams();
         body.append('appointment_id', currentAppointmentId);
         body.append('review', reviewText);
-
         fetch("save_review.php", {
           method: "POST",
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

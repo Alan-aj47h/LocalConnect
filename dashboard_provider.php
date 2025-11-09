@@ -1,13 +1,10 @@
 <?php
 session_start();
 include 'Login_dbconn.php';
-
 if (!isset($_SESSION['user_id'])) {
     die("You must be logged in to access this page.");
 }
 $provider_id = intval($_SESSION['user_id']);
-
-// Fetch provider's current status and name
 $provider_data = null;
 if ($stmt = $conn->prepare("SELECT name, status FROM users WHERE user_id = ? LIMIT 1")) {
     $stmt->bind_param("i", $provider_id);
@@ -18,10 +15,7 @@ if ($stmt = $conn->prepare("SELECT name, status FROM users WHERE user_id = ? LIM
     }
     $stmt->close();
 }
-
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
     if (isset($_POST['update_status']) && isset($_POST['appointment_id'])) {
         $appointment_id = intval($_POST['appointment_id']);
         $status = null;
@@ -43,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-
     if (isset($_POST['provider_reply']) && isset($_POST['appointment_id'])) {
         $appointment_id = intval($_POST['appointment_id']);
         $reply = trim($_POST['provider_reply']);
@@ -58,31 +51,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-
     if (isset($_POST['save_profile'])) {
         $business_name = trim($_POST['business_name'] ?? '');
         $category = trim($_POST['category'] ?? '');
         $about_service = trim($_POST['about_service'] ?? '');
         $price = trim($_POST['price'] ?? '');
         $locations = trim($_POST['locations'] ?? '');
-
         if ($stmt = $conn->prepare("SELECT service_id FROM service_details WHERE provider_id = ? LIMIT 1")) {
             $stmt->bind_param("i", $provider_id);
             $stmt->execute();
             $res = $stmt->get_result();
             if ($res && $res->num_rows) {
-                // existing row -> UPDATE
-                $stmt->close();
+            $stmt->close();
+              if ($provider_data['status'] === 'approved') {
                 $sql = "UPDATE service_details 
-                        SET business_name = ?, category = ?, about_service = ?, price = ?, locations = ?
-                        WHERE provider_id = ?";
-                if ($stmt = $conn->prepare($sql)) {
-                    $stmt->bind_param("sssssi", $business_name, $category, $about_service, $price, $locations, $provider_id);
-                    $stmt->execute();
-                    $stmt->close();
-                }
-            } else {
-                // no row -> INSERT
+                SET business_name = ?, about_service = ?, price = ?, locations = ?
+                WHERE provider_id = ?";
+                 if ($stmt = $conn->prepare($sql)) {
+                  $stmt->bind_param("ssssi", $business_name, $about_service, $price, $locations, $provider_id);
+                  $stmt->execute();
+                  $stmt->close();
+             }
+         } else {
+        $sql = "UPDATE service_details 
+                SET business_name = ?, category = ?, about_service = ?, price = ?, locations = ?
+                WHERE provider_id = ?";
+        if ($stmt = $conn->prepare($sql)) {
+            $stmt->bind_param("sssssi", $business_name, $category, $about_service, $price, $locations, $provider_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+     } else {
                 $stmt->close();
                 $sql = "INSERT INTO service_details (provider_id, business_name, category, about_service, price, locations)
                         VALUES (?, ?, ?, ?, ?, ?)";
@@ -93,28 +93,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-    
-        // Mark provider as pending for review, but don't change 'approved' status
         if ($stmt = $conn->prepare("UPDATE users SET status = CASE WHEN status='approved' THEN status ELSE 'pending' END WHERE user_id = ? AND role = 'provider'")) {
             $stmt->bind_param("i", $provider_id);
             $stmt->execute();
             $stmt->close();
         }
     }
-    
-    // 4) Provider review reply
     if (isset($_POST['save_review_reply']) && isset($_POST['review_id'])) {
         $review_id = intval($_POST['review_id']);
         $reply = trim($_POST['reply']);
-
-        // Check if the review belongs to this provider before updating
         $check_sql = "SELECT review_id FROM reviews WHERE review_id = ? AND provider_id = ?";
         if ($check_stmt = $conn->prepare($check_sql)) {
             $check_stmt->bind_param("ii", $review_id, $provider_id);
             $check_stmt->execute();
             $check_res = $check_stmt->get_result();
             if ($check_res && $check_res->num_rows > 0) {
-                // It's a valid review for this provider, so update
                 $update_sql = "UPDATE reviews SET reply = ?, reply_at = NOW() WHERE review_id = ?";
                 if ($update_stmt = $conn->prepare($update_sql)) {
                     $update_stmt->bind_param("si", $reply, $review_id);
@@ -125,8 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $check_stmt->close();
         }
     }
-
-    // --- REDIRECT LOGIC ---
     $base_url = strtok($_SERVER["REQUEST_URI"], '?');
     if (isset($_POST['save_review_reply'])) {
         header("Location: " . $base_url . '#reviews');
@@ -147,7 +138,6 @@ if ($stmt = $conn->prepare("SELECT * FROM service_details WHERE provider_id = ? 
 }
 $required_fields = ['business_name','category','about_service','price','locations'];
 $profile_incomplete = true; 
-
 if ($service) {
     $profile_incomplete = false;
     foreach ($required_fields as $f) {
@@ -204,8 +194,37 @@ function getUserInfo($conn, $user_id) {
   <meta charset="utf-8">
   <title>LocalConnect - Provider Dashboard</title>
   <link rel="stylesheet" href="dasboard_providerstyle.css">
-</head>
+  </head>
 <body>
+  <?php if($provider_data && $provider_data['status'] === 'deleted'): ?>
+<div class="notice-box notice-deleted">
+⚠️ <b>Important Notice</b><br><br>
+Your LocalConnect provider account has been <b>permanently removed</b> by the Administration team.<br>
+All your service listings, appointments, reviews and account data are no longer accessible.<br><br>
+If you believe this action was made by mistake, kindly contact support at<br>
+<u>localconnect@gmail.com</u> for clarification.
+</div>
+<?php endif; ?>
+<?php if($provider_data && $provider_data['status'] === 'suspended'): ?>
+<div class="notice-box notice-deleted">
+⚠️ <b>Notice:</b> Your LocalConnect provider account has been temporarily suspended.
+Please contact our support team at <u>localconnect@gmail.com</u> to review and reactivate your account.
+</div>
+<?php endif; ?>
+<?php if($provider_data && $provider_data['status'] === 'rejected'): ?>
+<div style="background:#ffeded;padding:20px;margin:20px;border-radius:10px;border:1px solid #ff8a8a;color:#6b0000;font-weight:600;text-align:center;font-size:16px;">
+  ❗ <b>Your Profile Was Rejected</b><br><br>
+  Your previous submission did not meet our verification requirements.<br>
+  Please review and update your bussiness profile.<br><br>
+  <button style="padding:10px 20px;background:#0052ff;color:white;border:none;border-radius:6px;font-size:15px;cursor:pointer;margin-top:12px;"
+          onclick="window.location.href='update_provider.php';">
+     Re-Submit Profile
+  </button>
+</div>
+<?php
+exit;
+endif;
+?>
 <?php
   if ($provider_data && $provider_data['status'] === 'pending' && !$profile_incomplete):
 ?>
@@ -235,7 +254,6 @@ function getUserInfo($conn, $user_id) {
           </ul>
         </nav>
       </aside>
-
       <main class="main-content">
         <section id="appointments" class="content-section">
           <h2>Appointments</h2>
@@ -256,7 +274,6 @@ function getUserInfo($conn, $user_id) {
                 <p>Message: <?= nl2br(htmlspecialchars($appt['message'] ?? '')) ?></p>
                 <p>Status: <?= htmlspecialchars($appt['status'] ?? 'Pending') ?></p>
                 <p>Provider Reply: <?= nl2br(htmlspecialchars($appt['provider_reply'] ?? '')) ?></p>
-
                 <div class="appt-actions">
                   <?php if (strtolower(trim($appt['status'] ?? '')) === 'pending'): ?>
                     <form method="POST" style="display:inline-block;margin-right:8px;">
@@ -265,14 +282,12 @@ function getUserInfo($conn, $user_id) {
                       <button type="submit" name="update_status" value="reject">Reject</button>
                     </form>
                   <?php endif; ?>
-
                   <?php if (strtolower(trim($appt['status'] ?? '')) === 'accepted'): ?>
                     <form method="POST" style="display:inline-block; float:right; margin-left:10px;">
                       <input type="hidden" name="appointment_id" value="<?= intval($appt_id) ?>">
                       <button type="submit" class="btn-complete" name="update_status" value="completed">Mark Completed</button>
                     </form>
                   <?php endif; ?>
-
                   <form method="POST" style="margin-top:8px;">
                     <input type="hidden" name="appointment_id" value="<?= intval($appt_id) ?>">
                     <label>Reply to customer</label><br>
@@ -284,7 +299,6 @@ function getUserInfo($conn, $user_id) {
             <?php endforeach; ?>
           <?php endif; ?>
         </section>
-
         <section id="reviews" class="content-section hidden">
           <h2>Reviews</h2>
           <?php if (empty($reviews)): ?>
@@ -295,7 +309,6 @@ function getUserInfo($conn, $user_id) {
                 <p class="customer-name"><?= htmlspecialchars($review['customer_name'] ?? 'Unknown') ?></p>
                 <p class="review-text">"<?= nl2br(htmlspecialchars($review['review'])) ?>"</p>
                 <p><small>Reviewed on: <?= date('F j, Y, g:i a', strtotime($review['created_at'])) ?></small></p>
-
                 <?php if (!empty($review['reply'])): ?>
                   <div class="provider-reply">
                     <p><strong>Your Reply:</strong></p>
@@ -305,7 +318,6 @@ function getUserInfo($conn, $user_id) {
                     <p><small>Replied on: <?= date('F j, Y, g:i a', strtotime($review['reply_at'])) ?></small></p>
                   </div>
                 <?php endif; ?>
-
                 <?php if (empty($review['reply'])): ?>
                   <form method="POST" class="reply-form" action="#reviews">
                     <input type="hidden" name="review_id" value="<?= intval($review['review_id']) ?>">
@@ -318,17 +330,14 @@ function getUserInfo($conn, $user_id) {
             <?php endforeach; ?>
           <?php endif; ?>
         </section>
-
         <section id="profile" class="content-section hidden">
           <h2>Edit Your Profile</h2>
           <form method="POST" action="#profile">
             <input type="hidden" name="save_profile" value="1">
-
             <label>Your Name / Business Name</label>
             <input type="text" name="business_name" value="<?= htmlspecialchars($service['business_name'] ?? '') ?>" required>
-
             <label>Service Category</label>
-            <select name="category" required>
+            <select name="category" required <?= ($provider_data['status'] === 'approved') ? 'disabled' : '' ?>>
               <?php
               $categories = ['Plumber','Carpenter','Electrician','Mechanic'];
               foreach ($categories as $cat) {
@@ -337,23 +346,18 @@ function getUserInfo($conn, $user_id) {
               }
               ?>
             </select>
-
             <label>About You / Your Business</label>
             <textarea name="about_service" required><?= htmlspecialchars($service['about_service'] ?? '') ?></textarea>
-
             <label>Service Price</label>
             <input type="text" name="price" value="<?= htmlspecialchars($service['price'] ?? '') ?>">
-
             <label>Locations (comma separated)</label>
             <input type="text" name="locations" value="<?= htmlspecialchars($service['locations'] ?? '') ?>">
-
             <button type="submit" name="save_profile"><?= $service ? 'Edit Profile' : 'Save Profile' ?></button>
           </form>
         </section>
       </main>
     </div>
   </div>
-  
   <script>
     document.addEventListener('DOMContentLoaded', function(){
       const links = document.querySelectorAll('.sidebar a');
@@ -369,7 +373,6 @@ function getUserInfo($conn, $user_id) {
           else l.classList.remove('active');
         });
       }
-
       links.forEach(link => {
         link.addEventListener('click', function(e){
           e.preventDefault();
@@ -378,7 +381,6 @@ function getUserInfo($conn, $user_id) {
           history.replaceState(null, '', '#'+target);
         });
       });
-
       const initial = window.location.hash ? window.location.hash.substring(1) : 'appointments';
       showSection(initial);
     });
@@ -395,17 +397,13 @@ function getUserInfo($conn, $user_id) {
     </div>
   </div>
 </div>
-
 <script>
   (function(){
     const PROFILE_INCOMPLETE = <?= $profile_incomplete ? 'true' : 'false' ?>;
-
     function showModal(id){ document.getElementById(id)?.classList.remove('hidden'); }
     function hideModal(id){ document.getElementById(id)?.classList.add('hidden'); }
-
     const goProfileBtn = document.getElementById('cp-go-profile');
     const laterBtn = document.getElementById('cp-later');
-
     if (goProfileBtn) {
       goProfileBtn.addEventListener('click', () => {
         hideModal('completeProfileModal');
@@ -414,7 +412,6 @@ function getUserInfo($conn, $user_id) {
       });
     }
     if (laterBtn) laterBtn.addEventListener('click', () => hideModal('completeProfileModal'));
-
     document.addEventListener('DOMContentLoaded', () => {
       if (PROFILE_INCOMPLETE && location.hash !== '#profile') {
         showModal('completeProfileModal');
@@ -422,6 +419,5 @@ function getUserInfo($conn, $user_id) {
     });
   })();
 </script>
-
 </body>
 </html>

@@ -9,7 +9,7 @@
 <body>
   <div class="container">
     <h2>Create Your Account</h2>
-    <form id="signupForm" action="Registration.php" method="POST" novalidate>
+    <form id="signupForm" action="Registration.php" method="POST">
       <label for="name">Full Name:</label>
       <input type="text" id="name" name="name" required>
       <span class="error" id="nameError"></span>
@@ -36,7 +36,7 @@
 
       <label>Choose Role:</label>
       <div class="role-options">
-        <label><input type="radio" name="role" value="customer "> Customer</label>
+        <label><input type="radio" name="role" value="customer"> Customer</label>
         <label><input type="radio" name="role" value="provider"> Service Provider</label>
       </div>
       <span class="error" id="roleError"></span>

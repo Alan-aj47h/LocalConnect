@@ -81,8 +81,11 @@ if (isset($_GET['tab']) && $_GET['tab'] === 'search' && !empty($_GET['search']))
     }
 }
 $pending_providers = [];
-$psql = "SELECT user_id, name, email, phone, address FROM users 
-         WHERE role='provider' AND status='pending'";
+$psql = "SELECT u.user_id, u.name, u.email, u.phone, u.address,
+                sd.business_name, sd.category, sd.about_service, sd.price, sd.locations
+         FROM users u
+         LEFT JOIN service_details sd ON u.user_id = sd.provider_id
+         WHERE u.role='provider' AND u.status='pending'";
 if ($pres = $conn->query($psql)) {
     while ($r = $pres->fetch_assoc()) $pending_providers[] = $r;
 }
@@ -92,7 +95,7 @@ if ($pres = $conn->query($psql)) {
 <head>
   <meta charset="UTF-8">
   <title>Admin Dashboard - LocalConnect</title>
-  <link rel="stylesheet" href="dasboard_providerstyle.css">
+  <link rel="stylesheet" href="admin_dashboard_style.css">
 </head>
 <body>
 <div class="container">
@@ -100,7 +103,6 @@ if ($pres = $conn->query($psql)) {
     <h1>LocalConnect</h1>
     <p>Welcome, <?= $admin_name ?>, Manage users and complaints here.</p>
   </header>
-
   <div class="dashboard-layout">
     <aside class="sidebar">
       <ul>
@@ -109,10 +111,8 @@ if ($pres = $conn->query($psql)) {
         <li><a href="?tab=verify" class="<?= ($_GET['tab'] ?? '') === 'verify' ? 'active' : '' ?>">Verify Provider</a></li>
       </ul>
     </aside>
-
     <main class="main-content">
       <?php $tab = $_GET['tab'] ?? 'complaints';  ?>
-
       <?php if ($tab === 'complaints'): ?>
         <h2>Complaints</h2>
         <?php if (!empty($complaints)): ?>
@@ -133,26 +133,52 @@ if ($pres = $conn->query($psql)) {
         <?php else: ?>
           <p>No pending complaints found.</p>
         <?php endif; ?>
-
       <?php elseif ($tab === 'search'): ?>
         <h2>Search Provider</h2>
         <form method="get" style="margin-bottom:15px;">
           <input type="hidden" name="tab" value="search">
-          <input type="number" name="search" placeholder="Enter Provider ID" required value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+          <input class="provider-search-input" type="number" name="search" placeholder="Enter Provider ID" required value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
           <button type="submit" class="btn btn-primary">Search</button>
         </form>
-
         <?php if (isset($_GET['search'])): ?>
             <?php if ($provider_details): ?>
+              <?php
+              $psql = $conn->prepare("SELECT status FROM users WHERE user_id=? LIMIT 1");
+              $psql->bind_param("i", $provider_id);
+              $psql->execute();
+              $pstatus = $psql->get_result()->fetch_assoc()['status'];
+              ?>
                 <div class="appt-box">
-                    <h3>Provider Details</h3>
-                    <p><strong>Business Name:</strong> <?= htmlspecialchars($provider_details['business_name'] ?? 'Not set') ?></p>
-                    <p><strong>Email:</strong> <?= htmlspecialchars($provider_details['email'] ?? 'N/A') ?></p>
-                    <p><strong>Description:</strong> <?= htmlspecialchars($provider_details['about_service'] ?? 'Not set') ?></p>
-                    <p><strong>Price Range:</strong> <?= htmlspecialchars($provider_details['price'] ?? 'Not set') ?></p>
-                    <p><strong>Locations:</strong> <?= htmlspecialchars($provider_details['locations'] ?? 'Not set') ?></p>
-                </div>
-
+               <h3>Provider Details</h3>
+               <p><strong>Business Name:</strong> <?= htmlspecialchars($provider_details['business_name'] ?? 'Not set') ?></p>
+               <p><strong>Email:</strong> <?= htmlspecialchars($provider_details['email'] ?? 'N/A') ?></p>
+               <p><strong>Description:</strong> <?= htmlspecialchars($provider_details['about_service'] ?? 'Not set') ?></p>
+               <p><strong>Price Range:</strong> <?= htmlspecialchars($provider_details['price'] ?? 'Not set') ?></p>
+               <p><strong>Locations:</strong> <?= htmlspecialchars($provider_details['locations'] ?? 'Not set') ?></p>
+               <div class="provider-action-buttons">
+              <?php if($pstatus === 'approved'): ?>
+            <form method="post" action="suspend_provider.php">
+                <input type="hidden" name="user_id" value="<?= $provider_id ?>">
+                <button class="btn btn-warning provider-btn">Suspend</button>
+            </form>
+        <?php elseif($pstatus === 'suspended'): ?>
+            <form method="post" action="unsuspend_provider.php">
+                <input type="hidden" name="user_id" value="<?= $provider_id ?>">
+                <button class="btn btn-primary provider-btn">Un-Suspend</button>
+            </form>
+        <?php endif; ?>
+        <?php if($pstatus !== 'deleted'): ?>
+           <form method="post" action="delete_provider.php" onsubmit="return confirm('Are you sure you want to permanently delete this provider? This action cannot be undone.');">
+            <input type="hidden" name="user_id" value="<?= $provider_id ?>">
+            <button class="btn btn-danger provider-btn">Delete</button>
+           </form>
+       <?php else: ?>
+          <div style="padding:10px;color:#b30000;font-weight:600;">
+            Provider account is permanently deleted.
+<         /div>
+       <?php endif; ?>
+     </div>
+    </div>
                 <h3 style="margin-top: 20px;">Appointments Received</h3>
                 <?php if (!empty($provider_appointments)): ?>
                     <?php foreach ($provider_appointments as $appt): ?>
@@ -166,12 +192,10 @@ if ($pres = $conn->query($psql)) {
                 <?php else: ?>
                     <p>This provider has no appointments on record.</p>
                 <?php endif; ?>
-
             <?php else: ?>
                 <p>No provider found with that ID.</p>
             <?php endif; ?>
         <?php endif; ?>
-
       <?php elseif ($tab === 'verify'): ?>
         <h2>Verify New Providers</h2>
         <?php if (!empty($pending_providers)): ?>
@@ -179,8 +203,16 @@ if ($pres = $conn->query($psql)) {
             <div class="appt-box">
               <p><strong><?= htmlspecialchars($p['name']) ?></strong> (<?= htmlspecialchars($p['email']) ?>)</p>
               <p>Phone: <?= htmlspecialchars($p['phone']) ?></p>
-              <p>Address: <?= htmlspecialchars($p['address']) ?></p>
-              <form method="post" class="appt-actions">
+<p>Address: <?= htmlspecialchars($p['address']) ?></p>
+<div style="margin-top:12px;padding:12px;background:#2b2f33;border-radius:8px;">
+  <h4 style="margin:0 0 8px 0;color:#ffffff;font-size:16px;">Business Profile</h4>
+  <p><strong>Business Name:</strong> <?= htmlspecialchars($p['business_name'] ?? 'Not Provided') ?></p>
+  <p><strong>Category:</strong> <?= htmlspecialchars($p['category'] ?? 'Not Provided') ?></p>
+  <p><strong>About Service:</strong> <?= nl2br(htmlspecialchars($p['about_service'] ?? 'Not Provided')) ?></p>
+  <p><strong>Price:</strong> <?= htmlspecialchars($p['price'] ?? 'Not Provided') ?></p>
+  <p><strong>Locations:</strong> <?= htmlspecialchars($p['locations'] ?? 'Not Provided') ?></p>
+</div>
+<form method="post" class="appt-actions" style="margin-top:10px;">
                 <input type="hidden" name="user_id" value="<?= intval($p['user_id']) ?>">
                 <button type="submit" name="action" value="approve" class="btn btn-primary">Approve</button>
                 <button type="submit" name="action" value="reject" class="btn btn-danger">Reject</button>

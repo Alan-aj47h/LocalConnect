@@ -64,11 +64,8 @@
   </script>
   
   <?php
-    // Check if there is a login error message in the session
     if (isset($_SESSION['login_error'])) {
-        // Use JavaScript to display the alert
         echo "<script>alert('" . addslashes($_SESSION['login_error']) . "');</script>";
-        // Unset the session variable so the alert doesn't appear again on refresh
         unset($_SESSION['login_error']);
     }
   ?>
